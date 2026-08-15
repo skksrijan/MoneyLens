@@ -2,6 +2,10 @@
 
 > **Smart Personal Finance Tracker, Intelligent Budgeting & AI-Powered Wealth Advisor**
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-16a34a?style=for-the-badge&logo=render)](https://moneylens-6fgt.onrender.com)
+
+🌐 **Live Demo**: [https://moneylens-6fgt.onrender.com](https://moneylens-6fgt.onrender.com)
+
 MoneyLens is a modern, full-stack personal finance application built to help you track spending, set smart budgets, analyze financial health, and receive personalized advice from an AI Financial Advisor. It features an immutable **Blockchain Audit Trail**, **Automated Email Alerts**, **Bank Statement Importing (CSV & PDF)**, and **Multi-Currency Support**.
 
 ---
