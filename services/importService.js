@@ -275,14 +275,45 @@ const parseCSV = (filePath, userCurrency = 'USD') => {
 // PDF TEXT EXTRACTION
 // ─────────────────────────────────────────────────────────────────────────────
 
-const parsePDF = async (filePath) => {
+const parsePDF = async (filePath, password = '') => {
     const buffer = fs.readFileSync(filePath);
     try {
-        const data = await pdf(buffer, { normalizeWhitespace: false, disableCombineTextItems: false });
-        return data.text || '';
+        const pdfParams = { data: new Uint8Array(buffer) };
+        if (password && password.trim()) {
+            pdfParams.password = password.trim();
+        }
+
+        const pdfjs = await import('pdf-parse/lib/pdf.js/v1.10.100/build/pdf.js');
+        const pdfjsLib = pdfjs.default || pdfjs;
+        pdfjsLib.disableWorker = true;
+
+        const doc = await pdfjsLib.getDocument(pdfParams);
+        let fullText = '';
+
+        for (let i = 1; i <= doc.numPages; i++) {
+            const page = await doc.getPage(i);
+            const textContent = await page.getTextContent();
+            let lastY = null, pageText = '';
+            for (const item of textContent.items) {
+                if (lastY === item.transform[5] || !lastY) {
+                    pageText += item.str;
+                } else {
+                    pageText += '\n' + item.str;
+                }
+                lastY = item.transform[5];
+            }
+            fullText += '\n\n' + pageText;
+        }
+
+        doc.destroy();
+        return fullText || '';
     } catch (err) {
-        console.error('[PDF] pdf-parse failed:', err.message);
-        return '';
+        console.error('[PDF] Extraction failed:', err.message);
+        const errLower = (err.message || '').toLowerCase();
+        if (errLower.includes('password') || errLower.includes('encrypted') || errLower.includes('decrypt') || errLower.includes('no password')) {
+            throw new Error('This PDF is password-protected. Please enter the correct password in the PDF Password field and try again.');
+        }
+        throw new Error('Could not parse PDF file: ' + err.message);
     }
 };
 

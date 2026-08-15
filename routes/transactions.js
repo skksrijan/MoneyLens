@@ -278,10 +278,11 @@ router.post('/import', isAuth, upload.single('statement'), async (req, res) => {
             pTransactions = await parseCSV(filePath, userCurrency);
             console.log(`[Import] CSV parsed: ${pTransactions.length} transactions extracted`);
         } else if (req.file.mimetype === 'application/pdf' || originalNameLower.endsWith('.pdf')) {
-            const pdfText = await parsePDF(filePath);
+            const pdfPassword = (req.body.password || '').trim();
+            const pdfText = await parsePDF(filePath, pdfPassword);
             console.log(`[Import] PDF text length: ${pdfText.length} chars`);
 
-            const apiKey = (process.env.XAI_API_KEY || '').trim();
+            const apiKey = (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.XAI_API_KEY || '').trim();
             if (apiKey && apiKey !== 'your_grok_xai_api_key_here') {
                 try {
                     pTransactions = await parsePDFWithAI(pdfText, userCurrency);
