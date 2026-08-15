@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import passport from 'passport';
 import './config/passport.js'; // Load passport config
 import methodOverride from 'method-override';
@@ -36,7 +37,11 @@ app.use(flash());
 app.use(session({
     secret: process.env.SESSION_SECRET || 'finance_tracker_secret',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/finance_tracker',
+        ttl: 14 * 24 * 60 * 60 // 14 days
+    })
 }));
 
 app.use(passport.initialize());
