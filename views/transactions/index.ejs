@@ -1,0 +1,259 @@
+<%- include('../partials/header') %>
+    <div style="margin-top: 40px;">
+        <div style="display:flex; justify-content:space-between; align-items: center;">
+            <h1>Transactions</h1>
+            <div style="display: flex; gap: 10px;">
+                <a href="/transactions/import" class="btn-outline"
+                    style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="file-up" style="width: 16px;"></i> Import Statement
+                </a>
+                <button onclick="document.getElementById('categoryModal').style.display='flex'" class="btn-outline">+
+                    New Category</button>
+                <button onclick="document.getElementById('addModal').style.display='flex'" class="btn-primary">+ Add
+                    Transaction</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Remarks</th>
+                        <th>Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (transactions && transactions.length> 0) { %>
+                        <% transactions.forEach(t=> { %>
+                            <tr>
+                                <td>
+                                    <%= t.date %>
+                                </td>
+                                <td>
+                                    <%= t.Category ? t.Category.name : 'Other' %>
+                                </td>
+                                <td>
+                                    <%= t.description || '-' %>
+                                </td>
+                                <td class="type-<%= t.type %>">
+                                    <strong>
+                                        <%= userCurrency %>
+                                            <%= parseFloat(t.convertedAmount).toLocaleString(undefined,
+                                                {minimumFractionDigits: 2}) %>
+                                    </strong>
+                                    <% if (t.currency && t.currency !==userCurrency) { %>
+                                        <div style="font-size: 0.7rem; color: var(--text-muted); opacity: 0.8;">
+                                            Orig: <%= t.currency %>
+                                                <%= parseFloat(t.amount).toLocaleString() %>
+                                        </div>
+                                        <% } %>
+                                            <% if (t.receiptUrl) { %>
+                                                <div style="margin-top: 4px;">
+                                                    <a href="<%= t.receiptUrl %>" target="_blank"
+                                                        style="font-size: 0.7rem; color: var(--primary); text-decoration: none;">📄
+                                                        View Receipt</a>
+                                                </div>
+                                                <% } %>
+                                            <% if (t.blockHash) { %>
+                                                <div style="margin-top: 6px;">
+                                                    <span
+                                                        title="Block Hash: <%= t.blockHash %>"
+                                                        onclick="navigator.clipboard.writeText('<%= t.blockHash %>').then(()=>{ let el=document.getElementById('bc-toast'); el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2000); })"
+                                                        style="font-size: 0.68rem; color: #22d3ee; background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.25); padding: 2px 8px; border-radius: 100px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; user-select: none;">
+                                                        ⛓ On-Chain
+                                                    </span>
+                                                </div>
+                                            <% } %>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button class="btn-outline edit-btn"
+                                            style="padding: 5px 10px; font-size: 0.8rem;" data-id="<%= t.id %>"
+                                            data-type="<%= t.type %>" data-category="<%= t.categoryId %>"
+                                            data-amount="<%= t.amount %>" data-currency="<%= t.currency || 'USD' %>"
+                                            data-description="<%= t.description %>" data-date="<%= t.date %>"
+                                            data-receipt="<%= t.receiptUrl || '' %>">
+                                            Edit
+                                        </button>
+                                        <form action="/transactions/<%= t.id %>?_method=DELETE" method="POST"
+                                            onsubmit="return confirm('Are you sure?')">
+                                            <button type="submit" class="btn-outline"
+                                                style="padding: 5px 10px; font-size: 0.8rem; border-color: var(--danger); color: var(--danger);">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="5"
+                                            style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                            <div
+                                                style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                                <i data-lucide="receipt"
+                                                    style="width: 40px; height: 40px; opacity: 0.5;"></i>
+                                                <p>No transactions found. Click "Add Transaction" to get started!</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Modal -->
+    <div id="addModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+        <div class="auth-card">
+            <h3>Add Transaction</h3>
+            <form action="/transactions/add" method="POST" enctype="multipart/form-data">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group"><label>Type</label>
+                        <select name="type">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Currency</label>
+                        <select name="currency">
+                            <option value="USD">USD</option>
+                            <option value="INR">INR</option>
+                            <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                            <option value="JPY">JPY</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Category</label>
+                    <select name="categoryId">
+                        <% categories.forEach(c=> { %>
+                            <option value="<%= c.id %>">
+                                <%= c.name %>
+                            </option>
+                            <% }) %>
+                    </select>
+                </div>
+                <div class="form-group"><label>Amount</label><input type="number" name="amount" step="0.01" required>
+                </div>
+                <div class="form-group"><label>Remarks</label><input type="text" name="description"
+                        placeholder="e.g. Bought groceries"></div>
+                <div class="form-group"><label>Date</label><input type="date" name="date" required
+                        value="<%= new Date().toISOString().split('T')[0] %>"></div>
+                <div class="form-group">
+                    <label>Receipt (Optional)</label>
+                    <input type="file" name="receipt" accept="image/*,application/pdf"
+                        style="font-size: 0.8rem; padding: 10px; background: var(--bg-main); border-radius: 8px; border: 1px solid var(--border); width: 100%;">
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%;">Add Transaction</button>
+                <button type="button" onclick="document.getElementById('addModal').style.display='none'"
+                    class="btn-outline" style="width:100%; margin-top:10px;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+        <div class="auth-card">
+            <h3>Edit Transaction</h3>
+            <form action="/transactions/update?_method=PUT" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="id" id="editId">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group"><label>Type</label>
+                        <select name="type" id="editType">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Currency</label>
+                        <select name="currency" id="editCurrency">
+                            <option value="USD">USD</option>
+                            <option value="INR">INR</option>
+                            <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                            <option value="JPY">JPY</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Category</label>
+                    <select name="categoryId" id="editCategory">
+                        <% categories.forEach(c=> { %>
+                            <option value="<%= c.id %>">
+                                <%= c.name %>
+                            </option>
+                            <% }) %>
+                    </select>
+                </div>
+                <div class="form-group"><label>Amount</label><input type="number" name="amount" id="editAmount"
+                        step="0.01" required></div>
+                <div class="form-group"><label>Remarks</label><input type="text" name="description"
+                        id="editDescription"></div>
+                <div class="form-group"><label>Date</label><input type="date" name="date" id="editDate" required></div>
+                <div class="form-group">
+                    <label>Receipt (Upload to Replace)</label>
+                    <div id="currentReceipt"
+                        style="margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted); display: none;">📄 Has
+                        current receipt</div>
+                    <input type="file" name="receipt" accept="image/*,application/pdf"
+                        style="font-size: 0.8rem; padding: 10px; background: var(--bg-main); border-radius: 8px; border: 1px solid var(--border); width: 100%;">
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%;">Update</button>
+                <button type="button" onclick="document.getElementById('editModal').style.display='none'"
+                    class="btn-outline" style="width:100%; margin-top:10px;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="categoryModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+        <div class="auth-card">
+            <h3>Add New Category</h3>
+            <form action="/categories/add" method="POST" style="margin-top: 20px;">
+                <div class="form-group"><label>Name</label><input type="text" name="name" placeholder="e.g. Health"
+                        required></div>
+                <div class="form-group"><label>Type</label>
+                    <select name="type">
+                        <option value="expense">Expense</option>
+                        <option value="income">Income</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%;">Create Category</button>
+                <button type="button" onclick="document.getElementById('categoryModal').style.display='none'"
+                    class="btn-outline" style="width:100%; margin-top:10px;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const { id, type, category, amount, currency, description, date, receipt } = btn.dataset;
+                document.getElementById('editId').value = id;
+                document.getElementById('editType').value = type;
+                document.getElementById('editCategory').value = category;
+                document.getElementById('editAmount').value = amount;
+                document.getElementById('editCurrency').value = currency;
+                document.getElementById('editDescription').value = description;
+                document.getElementById('editDate').value = date;
+
+                const receiptDiv = document.getElementById('currentReceipt');
+                receiptDiv.style.display = receipt ? 'block' : 'none';
+
+                document.getElementById('editModal').style.display = 'flex';
+            });
+        });
+
+        lucide.createIcons();
+    </script>
+
+    <!-- Blockchain copy toast -->
+    <div id="bc-toast" style="position:fixed;bottom:28px;right:28px;background:#6366f1;color:white;padding:10px 20px;border-radius:10px;font-size:0.85rem;font-weight:600;box-shadow:0 8px 24px rgba(99,102,241,0.5);opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999;">
+        📋 Block hash copied!
+    </div>
+
+    <%- include('../partials/footer') %>

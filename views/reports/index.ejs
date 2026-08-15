@@ -1,0 +1,253 @@
+<%- include('../partials/header') %>
+    <div style="margin-top: 40px;">
+        <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom: 30px;">
+            <h1>Financial Reports</h1>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <button onclick="window.print()" class="btn-outline"
+                    style="background: var(--primary); color: white; border: none; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+                    Download PDF
+                </button>
+                <span style="color: var(--text-muted);">In <strong>
+                        <%= userCurrency %>
+                    </strong></span>
+                <form action="/reports" method="GET" style="display: flex; gap: 10px; align-items: center;">
+                    <label style="color: var(--text-muted);">Year:</label>
+                    <select name="year" onchange="this.form.submit()"
+                        style="background: var(--bg-card); color: white; border: 1px solid var(--border); padding: 8px; border-radius: 8px; cursor: pointer;">
+                        <% for(let y=new Date().getFullYear(); y>= 2020; y--) { %>
+                            <option value="<%= y %>" <%=currentYear==y ? 'selected' : '' %>><%= y %>
+                            </option>
+                            <% } %>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="dashboard-grid" style="margin-top: 20px;">
+            <div class="stat-card" style="border-top: 4px solid var(--success);">
+                <span class="stat-label">TOTAL INCOME (<%= currentYear %>)</span>
+                <div class="stat-value" style="color: var(--success); font-size: 1.8rem;">
+                    <%= userCurrency %>
+                        <%= totalIncome.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                            %>
+                </div>
+            </div>
+            <div class="stat-card" style="border-top: 4px solid var(--danger);">
+                <span class="stat-label">TOTAL EXPENSES (<%= currentYear %>)</span>
+                <div class="stat-value" style="color: var(--danger); font-size: 1.8rem;">
+                    -<%= userCurrency %>
+                        <%= totalExpense.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                            %>
+                </div>
+            </div>
+            <div class="stat-card" style="border-top: 4px solid var(--primary);">
+                <span class="stat-label">NET BALANCE</span>
+                <div class="stat-value" style="font-size: 1.8rem;">
+                    <%= userCurrency %>
+                        <%= (totalIncome - totalExpense).toLocaleString(undefined, {minimumFractionDigits: 2,
+                            maximumFractionDigits: 2}) %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Breakdown Table -->
+        <div class="stat-card" style="margin-top: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="margin: 0;">Monthly Breakdown (<%= currentYear %>)</h3>
+                <span
+                    style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Income
+                    vs. Expenses</span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr
+                            style="border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <th style="padding: 12px 10px;">Month</th>
+                            <th style="padding: 12px 10px; text-align: right;">Income</th>
+                            <th style="padding: 12px 10px; text-align: right;">Expenses</th>
+                            <th style="padding: 12px 10px; text-align: right;">Net Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% fullYearBreakdown.forEach(row=> { %>
+                            <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;"
+                                onmouseover="this.style.background='rgba(255,255,255,0.02)'"
+                                onmouseout="this.style.background='transparent'">
+                                <td style="padding: 15px 10px; font-weight: 500;">
+                                    <%= row.month %>
+                                </td>
+                                <td style="padding: 15px 10px; text-align: right; color: var(--success);">
+                                    <%= row.income> 0 ? row.income.toLocaleString(undefined, {minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2}) : '—' %>
+                                </td>
+                                <td style="padding: 15px 10px; text-align: right; color: var(--danger);">
+                                    <%= row.expense> 0 ? row.expense.toLocaleString(undefined, {minimumFractionDigits:
+                                        2, maximumFractionDigits: 2}) : '—' %>
+                                </td>
+                                <% const savingsClass=row.savings>= 0 ? 'type-income' : 'type-expense';
+                                    const formattedSavings = row.savings === 0 ? '—' :
+                                    (row.savings > 0 ? '' : '-') + userCurrency + ' ' +
+                                    Math.abs(row.savings).toLocaleString(undefined, {minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2});
+                                    %>
+                                    <td class="<%= savingsClass %>"
+                                        style="padding: 15px 10px; text-align: right; font-weight: 700;">
+                                        <%= formattedSavings %>
+                                    </td>
+                            </tr>
+                            <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="dashboard-grid" style="margin-top: 30px;">
+            <div class="chart-container" style="grid-column: span 2;">
+                <h3>6-Month Financial Trend (<%= userCurrency %>)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid" style="margin-top: 30px;">
+            <div class="chart-container">
+                <h3>Expenses by Category</h3>
+                <div class="chart-wrapper" style="position: relative;">
+                    <% if (Object.keys(expenseCategories).length> 0) { %>
+                        <canvas id="expenseCatChart"></canvas>
+                        <% } else { %>
+                            <div
+                                style="display: flex; height: 100%; align-items: center; justify-content: center; color: var(--text-muted); font-style: italic;">
+                                Currently no records
+                            </div>
+                            <% } %>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>Income by Category</h3>
+                <div class="chart-wrapper" style="position: relative;">
+                    <% if (Object.keys(incomeCategories).length> 0) { %>
+                        <canvas id="incomeCatChart"></canvas>
+                        <% } else { %>
+                            <div
+                                style="display: flex; height: 100%; align-items: center; justify-content: center; color: var(--text-muted); font-style: italic;">
+                                Currently no records
+                            </div>
+                            <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data injection for Chart.js -->
+    <div id="reportData" data-months='<%- JSON.stringify(months) %>'
+        data-month-income='<%- JSON.stringify(monthIncome) %>' data-month-expense='<%- JSON.stringify(monthExpense) %>'
+        data-income-cats='<%- JSON.stringify(incomeCategories) %>'
+        data-expense-cats='<%- JSON.stringify(expenseCategories) %>' data-currency='<%= userCurrency %>'>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            const dataEl = document.getElementById('reportData');
+            const months = JSON.parse(dataEl.dataset.months);
+            const monthIncome = JSON.parse(dataEl.dataset.monthIncome);
+            const monthExpense = JSON.parse(dataEl.dataset.monthExpense);
+            const incomeCats = JSON.parse(dataEl.dataset.incomeCats);
+            const expenseCats = JSON.parse(dataEl.dataset.expenseCats);
+            const userCurrency = dataEl.dataset.currency;
+
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#94a3b8', font: { family: "'Outfit', sans-serif" } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed.y !== null) {
+                                    label += userCurrency + ' ' + context.parsed.y.toLocaleString();
+                                } else {
+                                    label += userCurrency + ' ' + context.parsed.toLocaleString();
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            };
+
+            // 6-Month Trend Chart
+            new Chart(document.getElementById('trendChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: monthIncome,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Expense',
+                            data: monthExpense,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+
+            // Expense Category Chart
+            if (Object.keys(expenseCats).length > 0) {
+                new Chart(document.getElementById('expenseCatChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(expenseCats),
+                        datasets: [{
+                            data: Object.values(expenseCats),
+                            backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { ...commonOptions, cutout: '70%' }
+                });
+            }
+
+            // Income Category Chart
+            if (Object.keys(incomeCats).length > 0) {
+                new Chart(document.getElementById('incomeCatChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(incomeCats),
+                        datasets: [{
+                            data: Object.values(incomeCats),
+                            backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#06b6d4'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { ...commonOptions, cutout: '70%' }
+                });
+            }
+        });
+    </script>
+    <%- include('../partials/footer') %>

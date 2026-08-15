@@ -1,0 +1,33 @@
+<%- include('partials/header') %>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <h2 class="auth-title">Welcome Back</h2>
+            <form action="/auth/login" method="POST">
+                <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between;">
+                        <label>Password</label>
+                        <a href="/auth/forgot-password" style="color: var(--primary); font-size: 0.85rem;">Forgot?</a>
+                    </div>
+                    <input type="password" name="password" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Login</button>
+            </form>
+
+            <div style="margin: 20px 0; display: flex; align-items: center; color: var(--text-muted);">
+                <hr style="flex: 1; border: 0; border-top: 1px solid var(--border);">
+                <span style="padding: 0 10px; font-size: 0.8rem;">OR</span>
+                <hr style="flex: 1; border: 0; border-top: 1px solid var(--border);">
+            </div>
+
+            <a href="/auth/google" class="google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+                Continue with Google
+            </a>
+
+            <p style="text-align: center; margin-top: 25px; color: var(--text-muted); font-size: 0.9rem;">
+                Don't have an account? <a href="/auth/register" style="color: var(--primary);">Sign Up</a>
+            </p>
+        </div>
+    </div>
+    <%- include('partials/footer') %>

@@ -1,0 +1,107 @@
+<%- include('../partials/header') %>
+    <div style="margin-top: 40px;">
+        <h1>Budgets</h1>
+        <div class="dashboard-grid">
+            <div class="auth-card">
+                <h3>Set Budget</h3>
+                <form action="/budgets/add" method="POST" style="margin-top:20px;">
+                    <div class="form-group"><label>Category</label>
+                        <select name="categoryId"
+                            style="width:100%; padding:10px; background:var(--bg-main); color:white; border-radius:8px;">
+                            <% categories.forEach(c=> { %><option value="<%= c.id %>">
+                                    <%= c.name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Amount (<%= userCurrency %>)</label><input type="number"
+                            name="amount" step="0.01" required></div>
+                    <div class="form-group"><label>Remarks</label><input type="text" name="description"
+                            placeholder="e.g. Monthly groceries limit"></div>
+                    <button type="submit" class="btn-primary" style="width:100%;">Save</button>
+                </form>
+            </div>
+            <div class="stat-card" style="grid-column: span 2;">
+                <h3>Active Budgets</h3>
+                <div style="margin-top: 20px;">
+                    <% if (budgets && budgets.length> 0) { %>
+                        <% budgets.forEach(b=> { %>
+                            <div
+                                style="display:flex; justify-content:space-between; padding:15px 0; border-bottom:1px solid var(--border);">
+                                <span>
+                                    <%= b.Category.name %>
+                                </span>
+                                <span style="font-size: 0.9rem; color: var(--text-muted);">
+                                    <%= b.description || 'No remarks' %>
+                                </span>
+                                <span style="font-weight: 700;">
+                                    <%= userCurrency %>
+                                        <%= parseFloat(b.convertedAmount).toLocaleString(undefined,
+                                            {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+                                </span>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <button class="btn-outline" style="padding: 5px 10px; font-size: 0.8rem;"
+                                        onclick="openEditBudgetModal('<%= b.id %>', '<%= b.categoryId %>', '<%= b.convertedAmount %>', '<%= b.description %>')">
+                                        Edit
+                                    </button>
+                                    <form action="/budgets/<%= b.id %>?_method=DELETE" method="POST"
+                                        onsubmit="return confirm('Are you sure?')">
+                                        <button type="submit" class="btn-outline"
+                                            style="padding: 5px 10px; font-size: 0.8rem; border-color: var(--danger); color: var(--danger);">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <% }) %>
+                                <% } else { %>
+                                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                        <div
+                                            style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                            <i data-lucide="piggy-bank"
+                                                style="width: 40px; height: 40px; opacity: 0.5;"></i>
+                                            <p>No budgets set yet. Start by setting your first budget!</p>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Budget Modal -->
+    <div id="editBudgetModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+        <div class="auth-card">
+            <h3>Edit Budget</h3>
+            <form action="/budgets/update?_method=PUT" method="POST" style="margin-top: 20px;">
+                <input type="hidden" name="id" id="editBudgetId">
+                <div class="form-group"><label>Category</label>
+                    <select name="categoryId" id="editBudgetCategory"
+                        style="width:100%; padding:10px; background:var(--bg-main); color:white; border-radius:8px;">
+                        <% categories.forEach(c=> { %><option value="<%= c.id %>">
+                                <%= c.name %>
+                            </option>
+                            <% }) %>
+                    </select>
+                </div>
+                <div class="form-group"><label>Amount (<%= userCurrency %>)</label><input type="number" name="amount"
+                        id="editBudgetAmount" step="0.01" required></div>
+                <div class="form-group"><label>Remarks</label><input type="text" name="description"
+                        id="editBudgetDescription"></div>
+                <button type="submit" class="btn-primary" style="width:100%;">Update</button>
+                <button type="button" onclick="document.getElementById('editBudgetModal').style.display='none'"
+                    class="btn-outline" style="width:100%; margin-top:10px;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditBudgetModal(id, categoryId, amount, description) {
+            document.getElementById('editBudgetId').value = id;
+            document.getElementById('editBudgetCategory').value = categoryId;
+            document.getElementById('editBudgetAmount').value = amount;
+            document.getElementById('editBudgetDescription').value = description;
+            document.getElementById('editBudgetModal').style.display = 'flex';
+        }
+    </script>
+    <%- include('../partials/footer') %>

@@ -1,0 +1,5 @@
+﻿[dotenv@17.2.4] injecting env (11) from .env -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.4] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+Connecting to Cloud DB at ep-flat-boat-aimmmkre-pooler.c-4.us-east-1.aws.neon.tech...
+Database connected and synchronized
+Server running on http://localhost:3000

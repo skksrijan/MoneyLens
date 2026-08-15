@@ -1,0 +1,191 @@
+﻿[dotenv@17.2.4] injecting env (11) from .env -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+[dotenv@17.2.4] injecting env (0) from .env -- tip: Γ£à audit secrets and track compliance: https://dotenvx.com/ops
+Connecting to Cloud DB at ep-flat-boat-aimmmkre-pooler.c-4.us-east-1.aws.neon.tech...
+node : Database connection 
+failed: ConnectionError 
+[SequelizeConnectionError]: 
+password authentication 
+failed for user 
+'neondb_owner'
+At line:1 char:1
++ node app.js 2>&1 | 
+Out-File -FilePath 
+startup_debug.txt -Encoding 
+utf ...
++ ~~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (Datab  
+  ase connec... 'neondb_o   
+ wner':String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+    at 
+Client._connectionCallback (
+C:\Users\Seenu\OneDrive\Desk
+top\Personal FT\personal-fin
+ance-tracker\node_modules\se
+quelize\lib\dialects\postgre
+s\connection-manager.js:145:
+24)
+    at Client._handleErrorWh
+ileConnecting (C:\Users\Seen
+u\OneDrive\Desktop\Personal 
+FT\personal-finance-tracker\
+node_modules\pg\lib\client.j
+s:376:19)
+    at 
+Client._handleErrorMessage (
+C:\Users\Seenu\OneDrive\Desk
+top\Personal FT\personal-fin
+ance-tracker\node_modules\pg
+\lib\client.js:396:19)
+    at Connection.emit 
+(node:events:518:28)
+    at C:\Users\Seenu\OneDri
+ve\Desktop\Personal FT\perso
+nal-finance-tracker\node_mod
+ules\pg\lib\connection.js:11
+5:12
+    at Parser.parse (C:\User
+s\Seenu\OneDrive\Desktop\Per
+sonal FT\personal-finance-tr
+acker\node_modules\pg-protoc
+ol\dist\parser.js:38:17)
+    at 
+TLSSocket.<anonymous> (C:\Us
+ers\Seenu\OneDrive\Desktop\P
+ersonal FT\personal-finance-
+tracker\node_modules\pg-prot
+ocol\dist\index.js:11:42)
+    at TLSSocket.emit 
+(node:events:518:28)
+    at addChunk (node:intern
+al/streams/readable:561:12)
+    at readableAddChunkPushB
+yteMode (node:internal/strea
+ms/readable:512:3) {
+  parent: error: password 
+authentication failed for 
+user 'neondb_owner'
+      at parseErrorMessage (
+C:\Users\Seenu\OneDrive\Desk
+top\Personal FT\personal-fin
+ance-tracker\node_modules\pg
+-protocol\dist\parser.js:305
+:11)
+      at 
+Parser.handlePacket (C:\User
+s\Seenu\OneDrive\Desktop\Per
+sonal FT\personal-finance-tr
+acker\node_modules\pg-protoc
+ol\dist\parser.js:143:27)
+      at Parser.parse (C:\Us
+ers\Seenu\OneDrive\Desktop\P
+ersonal FT\personal-finance-
+tracker\node_modules\pg-prot
+ocol\dist\parser.js:37:38)
+      at 
+TLSSocket.<anonymous> (C:\Us
+ers\Seenu\OneDrive\Desktop\P
+ersonal FT\personal-finance-
+tracker\node_modules\pg-prot
+ocol\dist\index.js:11:42)
+      at TLSSocket.emit 
+(node:events:518:28)
+      at addChunk (node:inte
+rnal/streams/readable:561:12
+)
+      at readableAddChunkPus
+hByteMode (node:internal/str
+eams/readable:512:3)
+      at Readable.push (node
+:internal/streams/readable:3
+92:5)
+      at 
+TLSWrap.onStreamRead (node:i
+nternal/stream_base_commons:
+189:23) {
+    length: 75,
+    severity: 'ERROR',
+    code: '28P01',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: 
+undefined,
+    internalQuery: 
+undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: undefined,
+    line: undefined,
+    routine: undefined
+  },
+  original: error: password 
+authentication failed for 
+user 'neondb_owner'
+      at parseErrorMessage (
+C:\Users\Seenu\OneDrive\Desk
+top\Personal FT\personal-fin
+ance-tracker\node_modules\pg
+-protocol\dist\parser.js:305
+:11)
+      at 
+Parser.handlePacket (C:\User
+s\Seenu\OneDrive\Desktop\Per
+sonal FT\personal-finance-tr
+acker\node_modules\pg-protoc
+ol\dist\parser.js:143:27)
+      at Parser.parse (C:\Us
+ers\Seenu\OneDrive\Desktop\P
+ersonal FT\personal-finance-
+tracker\node_modules\pg-prot
+ocol\dist\parser.js:37:38)
+      at 
+TLSSocket.<anonymous> (C:\Us
+ers\Seenu\OneDrive\Desktop\P
+ersonal FT\personal-finance-
+tracker\node_modules\pg-prot
+ocol\dist\index.js:11:42)
+      at TLSSocket.emit 
+(node:events:518:28)
+      at addChunk (node:inte
+rnal/streams/readable:561:12
+)
+      at readableAddChunkPus
+hByteMode (node:internal/str
+eams/readable:512:3)
+      at Readable.push (node
+:internal/streams/readable:3
+92:5)
+      at 
+TLSWrap.onStreamRead (node:i
+nternal/stream_base_commons:
+189:23) {
+    length: 75,
+    severity: 'ERROR',
+    code: '28P01',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: 
+undefined,
+    internalQuery: 
+undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: undefined,
+    line: undefined,
+    routine: undefined
+  }
+}

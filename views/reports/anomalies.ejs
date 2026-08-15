@@ -1,0 +1,159 @@
+<%- include('../partials/header') %>
+
+    <style>
+        .anomaly-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: transform 0.2s, border-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .anomaly-card:hover {
+            border-color: rgba(239, 68, 68, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .severity-high {
+            border-left: 5px solid var(--danger);
+        }
+
+        .severity-medium {
+            border-left: 5px solid #f59e0b;
+        }
+
+        .badge-high {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-medium {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .stat-ring {
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+    </style>
+
+    <div class="dashboard-container">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 25px;">
+            <div>
+                <h1
+                    style="font-size: 2.4rem; margin: 0 0 8px 0; background: linear-gradient(135deg, white 0%, #a1a1aa 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                    Financial Anomalies</h1>
+                <p style="color: var(--text-muted); margin: 0;">Our AI and Statistical engine identified <strong>
+                        <%= anomalies.length %>
+                    </strong> unusual events in your recent spending.</p>
+            </div>
+            <div>
+                <a href="/reports" class="btn-outline" style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="bar-chart-2" style="width: 18px;"></i>
+                    Standard Reports
+                </a>
+            </div>
+        </div>
+
+        <% if (anomalies.length===0) { %>
+            <div
+                style="text-align: center; padding: 100px 20px; background: var(--bg-card); border-radius: 20px; border: 1px dashed var(--border);">
+                <div
+                    style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                    <i data-lucide="shield-check" style="color: var(--success); width: 40px; height: 40px;"></i>
+                </div>
+                <h2 style="font-size: 1.5rem; color: white; margin-bottom: 10px;">Everything is healthy</h2>
+                <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto;">We analyzed your last 6 months of
+                    data and found no significant outliers or unusual clusters.</p>
+            </div>
+            <% } else { %>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 24px;">
+                    <% anomalies.forEach(item=> { %>
+                        <div class="anomaly-card severity-<%= item.severity %>">
+                            <div class="stat-ring"></div>
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                                <div>
+                                    <span class="badge badge-<%= item.severity %>"
+                                        style="text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; font-size: 0.7rem; padding: 4px 10px; border-radius: 6px;">
+                                        <%= item.severity %> RISK
+                                    </span>
+                                    <div style="margin-top: 12px; font-weight: 600; font-size: 1.1rem; color: white;">
+                                        <%= item.transaction.description %>
+                                    </div>
+                                    <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">
+                                        <i data-lucide="calendar"
+                                            style="width: 13px; display: inline-block; vertical-align: middle;"></i>
+                                        <%= item.transaction.date %> • <%= item.transaction.Category?.name
+                                                || 'Uncategorized' %>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 1.3rem; font-weight: 800; color: white;">
+                                        <%= userCurrency %>
+                                            <%= parseFloat(item.transaction.amount).toLocaleString(undefined,
+                                                {minimumFractionDigits: 2}) %>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                                <i data-lucide="info"
+                                    style="color: var(--text-muted); width: 18px; flex-shrink: 0; margin-top: 2px;"></i>
+                                <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">
+                                    <%= item.reason %>
+                                </p>
+                            </div>
+
+                            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                                <button class="btn-outline dismiss-btn" data-id="<%= item.transaction.id %>"
+                                    style="padding: 6px 15px; font-size: 0.8rem; border-radius: 8px;">Dismiss</button>
+                                <a href="/transactions" class="btn-primary"
+                                    style="padding: 6px 15px; font-size: 0.8rem; border-radius: 8px;">View Details</a>
+                            </div>
+                        </div>
+                        <% }) %>
+                </div>
+                <% } %>
+    </div>
+
+    <script>
+        document.querySelectorAll('.dismiss-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.getAttribute('data-id');
+                const card = btn.closest('.anomaly-card');
+
+                try {
+                    const response = await fetch(`/reports/anomalies/dismiss/${id}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            card.remove();
+                            if (document.querySelectorAll('.anomaly-card').length === 0) {
+                                location.reload();
+                            }
+                        }, 300);
+                    }
+                } catch (err) {
+                    console.error('Failed to dismiss anomaly:', err);
+                }
+            });
+        });
+    </script>
+    <%- include('../partials/footer') %>

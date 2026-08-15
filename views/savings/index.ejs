@@ -1,0 +1,245 @@
+<%- include('../partials/header') %>
+    <div style="margin-top: 40px;">
+        <div style="display:flex; justify-content:space-between; align-items: center;">
+            <h1>Savings & Investments</h1>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <span style="color: var(--text-muted);">Showing in <strong>
+                        <%= userCurrency %>
+                    </strong></span>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="document.getElementById('planModal').style.display='flex'" class="btn-outline">+
+                        Monthly Plan</button>
+                    <button onclick="document.getElementById('savingModal').style.display='flex'" class="btn-primary">+
+                        Add Investment</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="stat-card"
+            style="margin-top: 20px; background: linear-gradient(135deg, var(--primary), #4338ca); color: white;">
+            <span style="opacity: 0.8; font-size: 0.9rem;">Total Compiled Savings</span>
+            <div style="font-size: 2.5rem; font-weight: 700; margin-top: 10px;">
+                <%= userCurrency %>
+                    <%= totalSavings.toLocaleString(undefined, {minimumFractionDigits: 2}) %>
+            </div>
+            <% if (monthlyDeficit> 0) { %>
+                <div
+                    style="margin-top: 10px; font-size: 0.85rem; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; display: inline-block;">
+                    ⚠️ Overspending: <strong>
+                        <%= userCurrency %>
+                            <%= monthlyDeficit.toLocaleString() %>
+                    </strong> deducted from primary bank in view.
+                </div>
+                <% } %>
+        </div>
+
+        <div class="dashboard-grid" style="margin-top: 30px;">
+            <!-- Investments List -->
+            <div class="stat-card" style="grid-column: span 2;">
+                <h3 style="margin-bottom: 20px;">Your Portfolios (FDs, Shares, etc.)</h3>
+                <% if (savings.length> 0) { %>
+                    <div class="table-container" style="background: transparent; box-shadow: none;">
+                        <table style="width:100%;">
+                            <thead>
+                                <tr style="text-align: left; border-bottom: 1px solid var(--border);">
+                                    <th style="padding: 15px 0;">Source</th>
+                                    <th>Remarks</th>
+                                    <th style="text-align: right;">Amount</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% savings.forEach(s=> { %>
+                                    <tr style="border-bottom: 1px solid var(--border);">
+                                        <td style="padding: 15px 0; font-weight: 600;">
+                                            <%= s.source %>
+                                                <% if (s.isPrimary) { %>
+                                                    <span
+                                                        style="background: var(--success); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle;">PRIMARY
+                                                        BANK</span>
+                                                    <% } %>
+                                        </td>
+                                        <td style="color: var(--text-muted); font-size: 0.9rem;">
+                                            <%= s.description %>
+                                        </td>
+                                        <td style="text-align: right; color: var(--success); font-weight: 700;">
+                                            <%= userCurrency %>
+                                                <%= parseFloat(s.amount || 0).toLocaleString(undefined,
+                                                    {minimumFractionDigits: 2}) %>
+                                                    <% if (s.isPrimary && monthlyDeficit> 0) { %>
+                                                        <div
+                                                            style="font-size: 0.6rem; color: var(--danger); font-weight: 400; margin-top: 4px;">
+                                                            (Reduced by deficit)
+                                                        </div>
+                                                        <% } %>
+                                        </td>
+                                        <td
+                                            style="text-align: right; display: flex; gap: 8px; justify-content: flex-end; align-items: center; height: 100%; padding-top: 15px;">
+                                            <button class="edit-saving-btn" data-id="<%= s.id %>"
+                                                data-source="<%= s.source %>" data-amount="<%= s.amount %>"
+                                                data-description="<%= s.description %>"
+                                                data-primary="<%= s.isPrimary %>"
+                                                style="background:transparent; color:var(--primary); border:1px solid var(--primary); border-radius:4px; padding:2px 8px; font-size:0.7rem;">
+                                                Edit
+                                            </button>
+                                            <form action="/savings/<%= s.id %>?_method=DELETE" method="POST"
+                                                onsubmit="return confirm('Delete this source?')">
+                                                <button type="submit"
+                                                    style="background:transparent; color:var(--danger); border:1px solid var(--danger); border-radius:4px; padding:2px 8px; font-size:0.7rem;">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                        <% if (monthlyDeficit> 0) { %>
+                                            <tr
+                                                style="border-bottom: 1px solid var(--border); background: rgba(239, 68, 68, 0.05);">
+                                                <td style="padding: 15px 0; font-weight: 600; color: var(--danger);">💸
+                                                    Monthly Overspending</td>
+                                                <td style="color: var(--text-muted); font-size: 0.8rem;">Deducted from
+                                                    primary bank for coverage</td>
+                                                <td style="text-align: right; color: var(--danger); font-weight: 700;">
+                                                    -<%= userCurrency %>
+                                                        <%= monthlyDeficit.toLocaleString(undefined,
+                                                            {minimumFractionDigits: 2}) %>
+                                                </td>
+                                                <td></td>
+                                            </tr>
+                                            <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <% } else { %>
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                <i data-lucide="wallet" style="width: 40px; height: 40px; opacity: 0.5;"></i>
+                                <p>No investment sources added yet.</p>
+                            </div>
+                        </div>
+                        <% } %>
+            </div>
+
+            <!-- Monthly Save Plan -->
+            <div class="stat-card">
+                <h3 style="margin-bottom: 20px;">Monthly Save Plan</h3>
+                <% if (plans.length> 0) { %>
+                    <% plans.forEach(p=> { %>
+                        <div class="saving-plan-item <%= p.isCompleted ? 'completed' : '' %>">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <div class="plan-goal <%= p.isCompleted ? 'completed' : '' %>">
+                                        <%= p.goalName %>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                                        <%= p.month %> - Target: <%= userCurrency %>
+                                                <%= parseFloat(p.targetAmount || 0).toLocaleString(undefined,
+                                                    {minimumFractionDigits: 2}) %>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <form action="/savings/plan/toggle/<%= p.id %>" method="POST">
+                                        <button type="submit"
+                                            class="plan-check-btn <%= p.isCompleted ? 'completed' : '' %>">
+                                            <% if (p.isCompleted) { %> <span
+                                                    style="color: white; font-weight: bold;">✓</span>
+                                                <% } %>
+                                        </button>
+                                    </form>
+                                    <form action="/savings/plan/<%= p.id %>?_method=DELETE" method="POST"
+                                        onsubmit="return confirm('Delete this plan?')">
+                                        <button type="submit"
+                                            style="background:transparent; color:var(--danger); border:none; font-size:1.2rem; cursor:pointer;">×</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <% }) %>
+                            <% } else { %>
+                                <p style="color: var(--text-muted); text-align: center; padding: 30px;">Set your first
+                                    monthly saving goal!</p>
+                                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investment Modal -->
+    <div id="savingModal" class="modal-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+        <div class="auth-card">
+            <h3>Add Investment / Saving</h3>
+            <form action="/savings/add" method="POST" style="margin-top: 20px;">
+                <div class="form-group"><label>Source</label><input type="text" name="source"
+                        placeholder="e.g. Fixed Deposit, Tesla Shares" required></div>
+                <div class="form-group"><label>Amount (USD Base)</label><input type="number" name="amount" step="0.01"
+                        required></div>
+                <div class="form-group"><label>Remarks</label><input type="text" name="description"
+                        placeholder="e.g. Added in FD account, HDFC Bank"></div>
+                <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
+                    <input type="checkbox" name="isPrimary" value="true" style="width: auto;">
+                    <label style="margin-bottom: 0;">Set as Primary Bank (for overspending coverage)</label>
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%;">Add Source</button>
+                <button type="button" onclick="document.getElementById('savingModal').style.display='none'"
+                    class="btn-outline" style="width:100%; margin-top:10px;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Investment Modal -->
+    <div id="editSavingModal" class="modal-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+        <div class="auth-card">
+            <h3>Edit Investment</h3>
+            <form action="/savings/update?_method=PUT" method="POST" style="margin-top: 20px;">
+                <input type="hidden" name="id" id="editSavingId">
+                <div class="form-group"><label>Source</label><input type="text" name="source" id="editSavingSource"
+                        required></div>
+                <div class="form-group"><label>Amount</label><input type="number" name="amount" id="editSavingAmount"
+                        step="0.01" required></div>
+                <div class="form-group"><label>Remarks</label><input type="text" name="description"
+                        id="editSavingDescription"></div>
+                <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
+                    <input type="checkbox" name="isPrimary" value="true" id="editSavingIsPrimary" style="width: auto;">
+                    <label style="margin-bottom: 0;">Set as Primary Bank</label>
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%;">Update Source</button>
+                <button type="button" onclick="document.getElementById('editSavingModal').style.display='none'"
+                    class="btn-outline" style="width:100%; margin-top:10px;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Plan Modal -->
+    <div id="planModal" class="modal-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+        <div class="auth-card">
+            <h3>Create Saving Plan</h3>
+            <form action="/savings/plan/add" method="POST" style="margin-top: 20px;">
+                <div class="form-group"><label>Goal Name</label><input type="text" name="goalName"
+                        placeholder="e.g. Save for New Car" required></div>
+                <div class="form-group"><label>Target Amount</label><input type="number" name="targetAmount" step="0.01"
+                        required></div>
+                <div class="form-group"><label>Period (Month/Year)</label><input type="text" name="month"
+                        placeholder="e.g. February 2026" required></div>
+                <button type="submit" class="btn-primary" style="width:100%;">Set Plan</button>
+                <button type="button" onclick="document.getElementById('planModal').style.display='none'"
+                    class="btn-outline" style="width:100%; margin-top:10px;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.edit-saving-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const { id, source, amount, description, primary } = btn.dataset;
+                document.getElementById('editSavingId').value = id;
+                document.getElementById('editSavingSource').value = source;
+                document.getElementById('editSavingAmount').value = amount;
+                document.getElementById('editSavingDescription').value = description;
+                document.getElementById('editSavingIsPrimary').checked = primary === 'true';
+                document.getElementById('editSavingModal').style.display = 'flex';
+            });
+        });
+        lucide.createIcons();
+    </script>
+    <%- include('../partials/footer') %>

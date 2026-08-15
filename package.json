@@ -1,0 +1,46 @@
+{
+  "name": "personal-finance-tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@emailjs/nodejs": "^5.0.2",
+    "axios": "^1.13.5",
+    "bcryptjs": "^3.0.3",
+    "chart.js": "^4.5.1",
+    "cookie-session": "^2.1.1",
+    "csv-parser": "^3.1.2",
+    "dotenv": "^17.2.4",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "express-flash": "^0.0.2",
+    "express-session": "^1.19.0",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-static": "^0.563.0",
+    "method-override": "^3.0.0",
+    "mongoose": "^9.7.2",
+    "multer": "^2.0.2",
+    "nodemailer": "^8.0.1",
+    "papaparse": "^5.5.4",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-local": "^1.0.0",
+    "pdf-parse": "^1.1.4",
+    "resend": "^6.9.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}

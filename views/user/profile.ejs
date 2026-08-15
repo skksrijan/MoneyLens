@@ -1,0 +1,94 @@
+<%- include('../partials/header') %>
+
+    <div class="dashboard-container" style="padding-bottom: 60px;">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+            <div
+                style="width: 50px; height: 50px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                <i data-lucide="user" style="width: 30px; height: 30px;"></i>
+            </div>
+            <h1 style="font-size: 2rem; margin: 0;">My Profile</h1>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 40px; align-items: start;">
+            <!-- Profile Info Card -->
+            <div
+                style="background: var(--bg-card); padding: 30px; border-radius: 16px; border: 1px solid var(--border); text-align: center;">
+                <div
+                    style="width: 100px; height: 100px; background: rgba(99, 102, 241, 0.1); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: var(--primary); border: 2px solid var(--primary);">
+                    <span style="font-size: 2.5rem; font-weight: 700;">
+                        <%= user.name.charAt(0).toUpperCase() %>
+                    </span>
+                </div>
+                <h2 style="margin: 0; font-size: 1.5rem;">
+                    <%= user.name %>
+                </h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">
+                    <%= user.email %>
+                </p>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                    <div style="padding: 12px; background: var(--bg-main); border-radius: 8px; font-size: 0.9rem;">
+                        <span style="color: var(--text-muted);">Member Since:</span>
+                        <div style="font-weight: 500;">
+                            <%= new Date(user.createdAt).toLocaleDateString() %>
+                        </div>
+                    </div>
+                    <div style="padding: 12px; background: var(--bg-main); border-radius: 8px; font-size: 0.9rem;">
+                        <span style="color: var(--text-muted);">Current Currency:</span>
+                        <div style="font-weight: 500;">
+                            <%= user.currency %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Profile Form -->
+            <div
+                style="background: var(--bg-card); padding: 40px; border-radius: 16px; border: 1px solid var(--border);">
+                <h3 style="margin-top: 0; margin-bottom: 25px; display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="settings" style="width: 20px;"></i> Edit Details
+                </h3>
+
+                <form action="/user/profile" method="POST">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="name" value="<%= user.name %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" name="email" value="<%= user.email %>" required>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">
+                            <i data-lucide="info" style="width: 12px; display: inline-block;"></i> Changes will take
+                            effect on next login.
+                        </p>
+                    </div>
+
+                    <div style="margin-top: 30px; display: flex; gap: 15px;">
+                        <button type="submit" class="btn-primary"
+                            style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <i data-lucide="save" style="width: 18px;"></i> Save Changes
+                        </button>
+                        <a href="/dashboard" class="btn-outline" style="flex: 1; text-align: center;">Cancel</a>
+                    </div>
+                </form>
+
+                <hr style="margin: 40px 0; border: 0; border-top: 1px solid var(--border);">
+
+                <div
+                    style="background: rgba(239, 68, 68, 0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <h4
+                        style="color: var(--danger); margin-top: 0; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="shield-alert" style="width: 18px;"></i> Security
+                    </h4>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Want to change your
+                        password? You can use the forgot password flow from the login page.</p>
+                    <a href="/auth/forgot-password" class="btn-outline"
+                        style="font-size: 0.85rem; padding: 8px 15px; border-color: rgba(239, 68, 68, 0.3);">Reset
+                        Password</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>

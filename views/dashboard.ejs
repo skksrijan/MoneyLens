@@ -1,0 +1,300 @@
+<%- include('partials/header') %>
+    <div class="dashboard-container">
+        <div style="display:flex; justify-content:space-between; align-items: flex-end; margin-bottom: 30px;">
+            <div>
+                <h1 style="font-size: 2.5rem; letter-spacing: -1px; margin-bottom: 0;">Dashboard</h1>
+                <p style="color: var(--text-muted); margin-top: 5px;">Welcome back, <span
+                        style="color: var(--text-main); font-weight: 500;">
+                        <%= user.name %>!
+                    </span></p>
+            </div>
+            <div style="text-align: right;">
+                <p
+                    style="font-size: 0.85rem; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 100px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px;">
+                    <i data-lucide="globe" style="width: 14px; height: 14px;"></i>
+                    Totals in <strong>
+                        <%= userCurrency %>
+                    </strong>
+                </p>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Monthly Savings -->
+            <div class="stat-card savings">
+                <div class="stat-content">
+                    <div>
+                        <span class="stat-label">Monthly Savings</span>
+                        <div class="stat-value">
+                            <%= userCurrency %>
+                                <%= savings.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits:
+                                    2}) %>
+                        </div>
+                    </div>
+                    <div class="stat-icon"><i data-lucide="wallet"></i></div>
+                </div>
+            </div>
+
+            <!-- Total Savings -->
+            <div class="stat-card total">
+                <div class="stat-content">
+                    <div>
+                        <span class="stat-label">Total Savings</span>
+                        <div class="stat-value" style="color: var(--accent);">
+                            <%= userCurrency %>
+                                <%= totalSavingsCompiled.toLocaleString(undefined, {minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2}) %>
+                        </div>
+                    </div>
+                    <div class="stat-icon"><i data-lucide="piggy-bank"></i></div>
+                </div>
+            </div>
+
+            <!-- Monthly Income -->
+            <div class="stat-card income">
+                <div class="stat-content">
+                    <div>
+                        <span class="stat-label">Monthly Income</span>
+                        <div class="stat-value" style="color: var(--success);">
+                            +<%= userCurrency %>
+                                <%= totalIncome.toLocaleString(undefined, {minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2}) %>
+                        </div>
+                    </div>
+                    <div class="stat-icon"><i data-lucide="trending-up"></i></div>
+                </div>
+            </div>
+
+            <!-- Monthly Expense -->
+            <div class="stat-card expense">
+                <div class="stat-content">
+                    <div>
+                        <span class="stat-label">Monthly Expense</span>
+                        <div class="stat-value" style="color: var(--danger);">
+                            -<%= userCurrency %>
+                                <%= totalExpense.toLocaleString(undefined, {minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2}) %>
+                        </div>
+                    </div>
+                    <div class="stat-icon"><i data-lucide="trending-down"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid" style="margin-top: 30px;">
+            <div class="chart-container">
+                <h3>Financial Overview</h3>
+                <div class="chart-wrapper">
+                    <canvas id="overviewChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>Spending by Category</h3>
+                <div class="chart-wrapper">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="stat-card" style="grid-column: span 2;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>Budget Progress</h3>
+                    <a href="/budgets" class="btn-outline" style="padding: 5px 10px; font-size: 0.8rem;">+ Set
+                        Budget</a>
+                </div>
+                <div style="margin-top: 20px;">
+                    <% if (budgetProgress && budgetProgress.length> 0) { %>
+                        <% budgetProgress.forEach(function(b) { %>
+                            <div style="margin-bottom: 20px;">
+                                <div
+                                    style="display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-weight: 500;">
+                                            <%= b.category %>
+                                        </span>
+                                        <% if (parseFloat(b.spent)> parseFloat(b.limit)) { %>
+                                            <span
+                                                style="color: var(--danger); font-size: 0.75rem; padding: 2px 8px; background: rgba(239, 68, 68, 0.1); border-radius: 100px; font-weight: 600; white-space: nowrap;">
+                                                <i data-lucide="alert-triangle"
+                                                    style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px;"></i>
+                                                Exceeded by <%= userCurrency %>
+                                                    <%= (parseFloat(b.spent) -
+                                                        parseFloat(b.limit)).toLocaleString(undefined,
+                                                        {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+                                            </span>
+                                            <% } %>
+                                    </div>
+                                    <span style="font-size: 0.9rem; color: var(--text-muted);">
+                                        <strong <%- parseFloat(b.spent)> parseFloat(b.limit) ? 'style="color: #ef4444;"'
+                                            : 'style="color: #f8fafc;"' %>>
+                                            <%= userCurrency %>
+                                                <%= parseFloat(b.spent).toLocaleString(undefined,
+                                                    {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+                                        </strong>
+                                        / <%= userCurrency %>
+                                            <%= parseFloat(b.limit).toLocaleString(undefined, {minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2}) %>
+                                    </span>
+                                </div>
+                                <div
+                                    style="background: var(--bg-main); height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div class="progress-bar"
+                                        style="height: 100%; width: 0%; transition: all 0.6s ease;"
+                                        data-percent="<%= b.percent %>"></div>
+                                </div>
+                            </div>
+                            <% }); %>
+                                <% } else { %>
+                                    <p style="color: var(--text-muted); margin-top: 10px;">No budgets set. <a
+                                            href="/budgets" style="color: var(--primary);">Set one now</a></p>
+                                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container" style="margin-top: 40px;">
+            <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <h3>Recent Transactions</h3>
+                <a href="/transactions" class="btn-outline">View All</a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (recentTransactions && recentTransactions.length> 0) { %>
+                        <% recentTransactions.forEach(function(t) { %>
+                            <tr>
+                                <td>
+                                    <%= t.date %>
+                                </td>
+                                <td>
+                                    <%= t.Category ? t.Category.name : 'Uncategorized' %>
+                                </td>
+                                <td>
+                                    <%= t.description %>
+                                </td>
+                                <td class="type-<%= t.type %>">
+                                    <%= userCurrency %>
+                                        <%= t.type==='income' ? '+' : '-' %>
+                                            <%= parseFloat(t.amtInUserCurrency).toLocaleString(undefined,
+                                                {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+                                                <% if (t.currency && t.currency !==userCurrency) { %>
+                                                    <div
+                                                        style="font-size: 0.6rem; color: var(--text-muted); opacity: 0.7;">
+                                                        Orig: <%= t.currency %>
+                                                            <%= parseFloat(t.amount).toLocaleString() %>
+                                                    </div>
+                                                    <% } %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="4"
+                                            style="text-align: center; color: var(--text-muted); padding: 30px;">
+                                            <div
+                                                style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                                <i data-lucide="receipt"
+                                                    style="width: 32px; height: 32px; opacity: 0.5;"></i>
+                                                <p>No recent transactions</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Chart Data Storage -->
+    <div id="chartDataContainer" data-categories='<%- JSON.stringify(categoryData || {}) %>'
+        data-income-categories='<%- JSON.stringify(incomeCategoryData || {}) %>'
+        data-overview='<%- JSON.stringify({ income: totalIncome, expense: totalExpense, savings: savings }) %>'
+        data-currency='<%= userCurrency %>'>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // Animate progress bars
+            document.querySelectorAll('.progress-bar').forEach(bar => {
+                const percent = parseFloat(bar.getAttribute('data-percent'));
+                setTimeout(() => {
+                    bar.style.width = percent + '%';
+                    bar.style.background = percent > 90 ? 'var(--danger)' : 'var(--primary)';
+                }, 100);
+            });
+
+            const dataEl = document.getElementById('chartDataContainer');
+            const categoryData = JSON.parse(dataEl.getAttribute('data-categories'));
+            const overview = JSON.parse(dataEl.getAttribute('data-overview'));
+            const userCurrency = dataEl.getAttribute('data-currency');
+
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#94a3b8', font: { family: "'Outfit', sans-serif" } } }
+                }
+            };
+
+            // Overview Bar Chart
+            new Chart(document.getElementById('overviewChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Income', 'Expense', 'Savings'],
+                    datasets: [{
+                        label: 'Amount (' + userCurrency + ')',
+                        data: [overview.income, overview.expense, overview.savings],
+                        backgroundColor: ['#10b981', '#ef4444', '#6366f1'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+
+            // Spending Doughnut
+            if (Object.keys(categoryData).length > 0) {
+                new Chart(document.getElementById('categoryChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(categoryData),
+                        datasets: [{
+                            data: Object.values(categoryData),
+                            backgroundColor: ['#ef4444', '#f59e0b', '#6366f1', '#10b981', '#8b5cf6', '#ec4899'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { ...commonOptions, cutout: '70%' }
+                });
+            } else {
+                showPlaceholder('categoryChart', 'No spending data yet');
+            }
+
+            function showPlaceholder(id, msg) {
+                const canvas = document.getElementById(id);
+                const wrapper = canvas.parentElement;
+                const placeholder = document.createElement('div');
+                placeholder.style.cssText = 'height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-muted);';
+                placeholder.innerHTML = `<p>${msg}</p>`;
+                canvas.style.display = 'none';
+                wrapper.appendChild(placeholder);
+            }
+        });
+    </script>
+
+    <%- include('partials/footer') %>

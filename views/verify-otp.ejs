@@ -1,0 +1,25 @@
+<%- include('partials/header') %>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <h2 class="auth-title">Verify OTP</h2>
+            <p style="color: var(--text-muted); text-align: center; margin-bottom: 20px;">We've sent a code to your
+                email. Enter it below.</p>
+            <form action="/auth/verify-otp" method="POST">
+                <input type="hidden" name="email" value="<%= email %>">
+                <div class="form-group">
+                    <label>6-Digit Code</label>
+                    <input type="text" name="otp" required maxlength="6" placeholder="000000"
+                        style="text-align: center; letter-spacing: 5px; font-size: 1.5rem;">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Verify Code</button>
+            </form>
+            <div style="text-align: center; margin-top: 20px;">
+                <form action="/auth/forgot-password" method="POST" style="display: inline;">
+                    <input type="hidden" name="email" value="<%= email %>">
+                    <button type="submit" style="background: none; color: var(--primary); font-size: 0.9rem;">Resend
+                        Code</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <%- include('partials/footer') %>

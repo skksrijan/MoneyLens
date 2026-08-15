@@ -1,0 +1,117 @@
+<%- include('../partials/header') %>
+
+    <div class="dashboard-container">
+        <div
+            style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 40px;">
+            <div
+                style="width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 20px;">
+                <i data-lucide="file-up" style="width: 32px; height: 32px;"></i>
+            </div>
+            <div>
+                <h1 style="font-size: 2.5rem; margin: 0 0 10px 0;">Import Bank Statement</h1>
+                <p style="color: var(--text-muted); margin: 0; font-size: 1.1rem; max-width: 500px;">Upload your CSV or
+                    PDF statement to auto-track
+                    transactions and stay on top of your budget.</p>
+            </div>
+        </div>
+
+        <div style="max-width: 600px; margin: 0 auto;">
+            <div
+                style="background: var(--bg-card); padding: 40px; border-radius: 16px; border: 1px solid var(--border);">
+                <form action="/transactions/import" method="POST" enctype="multipart/form-data" id="import-form">
+                    <div class="upload-area" id="drop-zone"
+                        style="border: 2px dashed var(--border); border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s;">
+                        <i data-lucide="upload-cloud"
+                            style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 15px;"></i>
+                        <h3 style="margin: 0 0 10px;">Click to upload or drag and drop</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Supports CSV and PDF bank statements</p>
+                        <input type="file" name="statement" id="file-input" accept=".csv,.pdf" style="display: none;"
+                            required>
+                        <div id="file-info"
+                            style="display: none; margin-top: 20px; padding: 10px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; color: var(--primary);">
+                            <i data-lucide="file" style="width: 16px; vertical-align: middle;"></i>
+                            <span id="file-name" style="font-weight: 500;"></span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button type="submit" class="btn-primary"
+                            style="width: 100%; padding: 15px; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span>Process Statement</span>
+                            <i data-lucide="chevron-right" style="width: 18px;"></i>
+                        </button>
+                        <p style="margin-top: 15px; font-size: 0.85rem; color: var(--text-muted);">
+                            <i data-lucide="shield-check" style="width: 14px; display: inline-block;"></i> Your data is
+                            processed securely and never shared.
+                        </p>
+                    </div>
+                </form>
+            </div>
+
+            <div style="margin-top: 40px;">
+                <h4 style="margin-bottom: 20px;">Supported Formats</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div
+                        style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                        <div
+                            style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: #10b981;">
+                            <i data-lucide="file-spreadsheet" style="width: 20px;"></i>
+                            <span style="font-weight: 600;">CSV Statements</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Requires columns like Date,
+                            Description, and Amount.</p>
+                    </div>
+                    <div
+                        style="background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                        <div
+                            style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: #a855f7;">
+                            <i data-lucide="file-text" style="width: 20px;"></i>
+                            <span style="font-weight: 600;">PDF Statements</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Standard bank layouts
+                            (experimental support).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileName = document.getElementById('file-name');
+        const fileInfo = document.getElementById('file-info');
+
+        dropZone.onclick = () => fileInput.click();
+
+        fileInput.onchange = (e) => {
+            if (e.target.files.length) {
+                fileName.textContent = e.target.files[0].name;
+                fileInfo.style.display = 'block';
+                dropZone.style.borderColor = 'var(--primary)';
+                dropZone.style.background = 'rgba(99, 102, 241, 0.05)';
+            }
+        };
+
+        dropZone.ondragover = (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--primary)';
+            dropZone.style.background = 'rgba(99, 102, 241, 0.1)';
+        };
+
+        dropZone.ondragleave = () => {
+            dropZone.style.borderColor = 'var(--border)';
+            dropZone.style.background = 'transparent';
+        };
+
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                fileName.textContent = e.dataTransfer.files[0].name;
+                fileInfo.style.display = 'block';
+            }
+        };
+    </script>
+
+    <%- include('../partials/footer') %>
