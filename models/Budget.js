@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const BudgetSchema = new mongoose.Schema({
     amount: {
@@ -25,4 +25,5 @@ const BudgetSchema = new mongoose.Schema({
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-module.exports = mongoose.model('Budget', BudgetSchema);
+export default mongoose.model('Budget', BudgetSchema);
+

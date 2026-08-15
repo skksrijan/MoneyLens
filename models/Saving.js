@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const SavingSchema = new mongoose.Schema({
     source: {
@@ -25,4 +25,5 @@ const SavingSchema = new mongoose.Schema({
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-module.exports = mongoose.model('Saving', SavingSchema);
+export default mongoose.model('Saving', SavingSchema);
+

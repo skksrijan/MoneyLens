@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const SavingPlanSchema = new mongoose.Schema({
     goalName: {
@@ -24,4 +24,5 @@ const SavingPlanSchema = new mongoose.Schema({
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-module.exports = mongoose.model('SavingPlan', SavingPlanSchema);
+export default mongoose.model('SavingPlan', SavingPlanSchema);
+

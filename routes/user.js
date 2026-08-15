@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { User } = require('../models');
+import { User } from '../models/index.js';
 
 const isAuth = (req, res, next) => req.isAuthenticated() ? next() : res.redirect('/auth/login');
 
@@ -46,4 +46,4 @@ router.post('/profile', isAuth, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

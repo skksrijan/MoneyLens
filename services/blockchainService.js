@@ -1,5 +1,5 @@
-const crypto = require('crypto');
-const BlockchainBlock = require('../models/BlockchainBlock');
+import crypto from 'crypto';
+import BlockchainBlock from '../models/BlockchainBlock.js';
 
 // Mining difficulty: hash must start with this many zeros
 const DIFFICULTY = parseInt(process.env.BLOCKCHAIN_DIFFICULTY) || 2;
@@ -43,7 +43,7 @@ async function initBlockchain() {
     if (count === 0) {
         console.log('[Blockchain] No chain found — creating Genesis Block...');
         const timestamp = new Date().toISOString();
-        const data = { message: 'Genesis Block — FinanceTracker Blockchain Initialized' };
+        const data = { message: 'Genesis Block — MoneyLens Blockchain Initialized' };
         const previousHash = '0'.repeat(64);
         const { hash, nonce } = mineBlock(0, timestamp, data, previousHash);
 
@@ -260,7 +260,7 @@ async function getAllBlocks() {
     return BlockchainBlock.find().sort({ index: -1 });
 }
 
-module.exports = {
+export {
     initBlockchain,
     addTransactionBlock,
     addAmendmentBlock,

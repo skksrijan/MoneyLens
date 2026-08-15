@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { Transaction, Category } = require('../models');
-const { convert } = require('../services/currencyService');
+import { Transaction, Category } from '../models/index.js';
+import { convert } from '../services/currencyService.js';
+import { getAnomalies } from '../services/anomalyService.js';
 
 const isAuth = (req, res, next) => req.isAuthenticated() ? next() : res.redirect('/auth/login');
 
@@ -118,8 +119,6 @@ router.get('/', isAuth, async (req, res) => {
     }
 });
 
-const { getAnomalies } = require('../services/anomalyService');
-
 router.get('/anomalies', isAuth, async (req, res) => {
     try {
         const anomalies = await getAnomalies(req.user.id);
@@ -149,4 +148,4 @@ router.post('/anomalies/dismiss/:id', isAuth, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

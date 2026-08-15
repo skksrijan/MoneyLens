@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { Saving, SavingPlan, Transaction } = require('../models');
-const { convert } = require('../services/currencyService');
+import { Saving, SavingPlan, Transaction } from '../models/index.js';
+import { convert } from '../services/currencyService.js';
 
 const isAuth = (req, res, next) => req.isAuthenticated() ? next() : res.redirect('/auth/login');
 
@@ -133,4 +133,4 @@ router.delete('/plan/:id', isAuth, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

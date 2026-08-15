@@ -1,16 +1,15 @@
-const axios = require('axios');
-require('dotenv').config();
+import axios from 'axios';
 
 /**
- * EmailJS REST API sender (no private key needed, works server-side via axios)
+ * EmailJS REST API sender (server-side via axios)
  *
- * Template variables used (map to your EmailJS "Contact Us" template):
+ * Template variables used:
  *   {{to_email}}  → recipient's email  (set "To Email" field in dashboard to {{to_email}})
  *   {{title}}     → email subject / heading
- *   {{name}}      → sender display name (always "FinanceTracker")
+ *   {{name}}      → sender display name (always "MoneyLens")
  *   {{line}}      → subtitle / short description line
- *   {{message}}   → main body content (plain text or simple HTML)
- *   {{email}}     → reply-to address (set to sender/no-reply)
+ *   {{message}}   → main body content
+ *   {{email}}     → reply-to address
  */
 const sendEmail = async ({ to_email, title, line, message }) => {
     if (!process.env.EMAILJS_PUBLIC_KEY || !process.env.EMAILJS_SERVICE_ID || !process.env.EMAILJS_TEMPLATE_ID) {
@@ -19,27 +18,36 @@ const sendEmail = async ({ to_email, title, line, message }) => {
     }
 
     try {
-        const response = await axios.post('https://api.emailjs.com/api/v1.0/email/send', {
+        const payload = {
             service_id: process.env.EMAILJS_SERVICE_ID,
             template_id: process.env.EMAILJS_TEMPLATE_ID,
             user_id: process.env.EMAILJS_PUBLIC_KEY,
             template_params: {
                 to_email,
                 title,
-                name: 'FinanceTracker',
+                name: 'MoneyLens',
                 line,
                 message,
-                email: 'no-reply@financetracker.app'
+                email: 'no-reply@moneylens.app'
             }
-        }, {
+        };
+
+        if (process.env.EMAILJS_PRIVATE_KEY) {
+            payload.accessToken = process.env.EMAILJS_PRIVATE_KEY;
+        }
+
+        const response = await axios.post('https://api.emailjs.com/api/v1.0/email/send', payload, {
             headers: { 'Content-Type': 'application/json' }
         });
 
-        console.log(`EmailJS sent to ${to_email} [${title}] — ${response.status} ${response.data}`);
+        console.log(`[EmailJS Success] Sent email to ${to_email} [${title}] — ${response.status} ${response.data}`);
         return true;
     } catch (error) {
-        const detail = error.response ? `${error.response.status}: ${error.response.data}` : error.message;
-        console.error(`EmailJS error [${title}]:`, detail);
+        const detail = error.response ? `${error.response.status}: ${JSON.stringify(error.response.data)}` : error.message;
+        console.error(`[EmailJS Error] Failed to send email [${title}]:`, detail);
+        if (error.response && error.response.status === 403) {
+            console.error('⚠️ [EmailJS Security Setting Required] Please go to https://dashboard.emailjs.com/admin/account/security and enable "Allow EmailJS API for non-browser requests".');
+        }
         return false;
     }
 };
@@ -110,7 +118,7 @@ const sendOTP = async (userEmail, otp) => {
     return sendEmail({
         to_email: userEmail,
         title: '🔐 Your Password Reset OTP',
-        line: 'Use this code to reset your FinanceTracker password',
+        line: 'Use this code to reset your MoneyLens password',
         message:
             `We received a request to reset your password.\n\n` +
             `Your OTP code is:\n\n` +
@@ -126,10 +134,10 @@ const sendOTP = async (userEmail, otp) => {
 const sendVerificationEmail = async (userEmail, otp) => {
     return sendEmail({
         to_email: userEmail,
-        title: '📧 Verify Your Email — FinanceTracker',
+        title: '📧 Verify Your Email — MoneyLens',
         line: 'Enter this code to activate your account',
         message:
-            `Welcome to FinanceTracker!\n\n` +
+            `Welcome to MoneyLens!\n\n` +
             `Use the code below to verify your email address:\n\n` +
             `  ${otp}\n\n` +
             `This code expires in 10 minutes.\n\n` +
@@ -137,10 +145,4 @@ const sendVerificationEmail = async (userEmail, otp) => {
     });
 };
 
-module.exports = {
-    sendBudgetAlert,
-    sendBudgetUpdate,
-    sendTransactionBudgetUpdate,
-    sendOTP,
-    sendVerificationEmail
-};
+export { sendBudgetAlert, sendBudgetUpdate, sendTransactionBudgetUpdate, sendOTP, sendVerificationEmail };

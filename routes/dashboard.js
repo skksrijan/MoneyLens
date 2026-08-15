@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { Transaction, Category, Budget, Saving } = require('../models');
-const { convert } = require('../services/currencyService');
+import { Transaction, Category, Budget, Saving } from '../models/index.js';
+import { convert } from '../services/currencyService.js';
 
 const isAuth = (req, res, next) => req.isAuthenticated() ? next() : res.redirect('/auth/login');
 
@@ -49,10 +49,11 @@ router.get('/', isAuth, async (req, res) => {
 
         // Parallelize budget progress calculations
         const budgetProgress = await Promise.all(budgets.map(async (b) => {
-            const catId = b.categoryId ? b.categoryId._id.toString() : null;
-            const categoryTransactions = monthlyTransactions.filter(t =>
-                t.categoryId && t.categoryId.toString() === catId
-            );
+            const catId = b.categoryId ? (b.categoryId._id || b.categoryId).toString() : null;
+            const categoryTransactions = monthlyTransactions.filter(t => {
+                const tCatId = t.Category ? (t.Category._id || t.Category).toString() : (t.categoryId ? (t.categoryId._id || t.categoryId).toString() : null);
+                return tCatId && tCatId === catId;
+            });
 
             // Net spent = Expenses - Incomes (Refunds/Vouchers)
             const spent = categoryTransactions.reduce((acc, t) => {
@@ -66,7 +67,7 @@ router.get('/', isAuth, async (req, res) => {
                 category: b.categoryId ? b.categoryId.name : 'Unknown',
                 limit: limitInUserCurrency,
                 spent,
-                percent: limitInUserCurrency > 0 ? Math.min((spent / limitInUserCurrency) * 100, 100) : 0
+                percent: limitInUserCurrency > 0 ? (spent / limitInUserCurrency) * 100 : 0
             };
         }));
 
@@ -104,4 +105,4 @@ router.get('/', isAuth, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

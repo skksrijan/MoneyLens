@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { verifyChain, getAllBlocks, DIFFICULTY } = require('../services/blockchainService');
-const BlockchainBlock = require('../models/BlockchainBlock');
+import { verifyChain, getAllBlocks, DIFFICULTY } from '../services/blockchainService.js';
+import BlockchainBlock from '../models/BlockchainBlock.js';
 
 const isAuth = (req, res, next) => req.isAuthenticated() ? next() : res.redirect('/auth/login');
 
@@ -43,4 +43,4 @@ router.get('/block/:hash', isAuth, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

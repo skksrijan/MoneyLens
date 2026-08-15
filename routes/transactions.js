@@ -1,19 +1,18 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const { Transaction, Category, Budget } = require('../models');
-const { convert } = require('../services/currencyService');
-const { sendTransactionBudgetUpdate } = require('../services/emailService');
-const { parseCSV, parsePDF, parsePDFWithAI, parsePDFWithRegex, detectDuplicates, autoCategorize } = require('../services/importService');
-const { addTransactionBlock, addAmendmentBlock, addDeletionBlock } = require('../services/blockchainService');
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { Transaction, Category, Budget } from '../models/index.js';
+import { convert } from '../services/currencyService.js';
+import { sendTransactionBudgetUpdate, sendBudgetAlert } from '../services/emailService.js';
+import { ensureDefaultCategories } from '../services/categoryService.js';
+import { parseCSV, parsePDF, parsePDFWithAI, parsePDFWithRegex, detectDuplicates, autoCategorize } from '../services/importService.js';
+import { addTransactionBlock, addAmendmentBlock, addDeletionBlock } from '../services/blockchainService.js';
 
 const isAuth = (req, res, next) => req.isAuthenticated() ? next() : res.redirect('/auth/login');
 
 // ── Receipt upload: memory storage → base64 data URI stored in MongoDB ──────
-// Reason: Render (and most PaaS free tiers) have EPHEMERAL disk storage.
-// Files written to ./uploads/ are wiped on every deploy/restart.
-// Storing as base64 in MongoDB means receipts survive restarts permanently.
 const receiptUpload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max
@@ -41,6 +40,7 @@ function bufferToDataUri(file) {
 
 router.get('/', isAuth, async (req, res) => {
     try {
+        await ensureDefaultCategories(req.user.id);
         const userCurrency = req.user.currency || 'USD';
         const transactions = await Transaction.find({ userId: req.user.id })
             .populate('categoryId')
@@ -71,7 +71,6 @@ router.get('/', isAuth, async (req, res) => {
 router.post('/add', isAuth, receiptUpload.single('receipt'), async (req, res) => {
     try {
         const { amount, type, date, description, categoryId, currency } = req.body;
-        // Store receipt as base64 data URI in MongoDB (survives Render restarts)
         const receiptUrl = bufferToDataUri(req.file);
 
         const transaction = await Transaction.create({
@@ -85,7 +84,7 @@ router.post('/add', isAuth, receiptUpload.single('receipt'), async (req, res) =>
             userId: req.user.id
         });
 
-        // Mine a blockchain block for this transaction (non-blocking on failure)
+        // Mine a blockchain block for this transaction
         try {
             const block = await addTransactionBlock(transaction);
             await Transaction.findByIdAndUpdate(transaction._id, { blockHash: block.hash });
@@ -125,6 +124,11 @@ router.post('/add', isAuth, receiptUpload.single('receipt'), async (req, res) =>
                 spentInUserCurrency,
                 userCurrency
             );
+
+            if (spentInUserCurrency > limitInUserCurrency) {
+                console.log(`[Budget Alert] ${category.name} limit exceeded (${spentInUserCurrency} > ${limitInUserCurrency}). Sending email alert to ${req.user.email}...`);
+                await sendBudgetAlert(req.user.email, category.name, limitInUserCurrency, spentInUserCurrency);
+            }
         }
 
         res.redirect('/transactions');
@@ -138,7 +142,6 @@ router.put('/update', isAuth, receiptUpload.single('receipt'), async (req, res) 
     try {
         const { id, amount, type, date, description, categoryId, currency } = req.body;
 
-        // Fetch the ORIGINAL transaction BEFORE editing (needed for blockchain amendment)
         const oldTransaction = await Transaction.findOne({ _id: id, userId: req.user.id });
 
         const updateData = {
@@ -151,13 +154,11 @@ router.put('/update', isAuth, receiptUpload.single('receipt'), async (req, res) 
         };
 
         if (req.file) {
-            // Store new receipt as base64 data URI
             updateData.receiptUrl = bufferToDataUri(req.file);
         }
 
         await Transaction.findOneAndUpdate({ _id: id, userId: req.user.id }, updateData);
 
-        // Mine an AMENDMENT block — records before/after on-chain permanently
         if (oldTransaction) {
             try {
                 await addAmendmentBlock(oldTransaction, updateData, oldTransaction.blockHash);
@@ -198,6 +199,11 @@ router.put('/update', isAuth, receiptUpload.single('receipt'), async (req, res) 
                 spentInUserCurrency,
                 userCurrency
             );
+
+            if (spentInUserCurrency > limitInUserCurrency) {
+                console.log(`[Budget Alert] ${category.name} limit exceeded (${spentInUserCurrency} > ${limitInUserCurrency}). Sending email alert to ${req.user.email}...`);
+                await sendBudgetAlert(req.user.email, category.name, limitInUserCurrency, spentInUserCurrency);
+            }
         }
 
         res.redirect('/transactions');
@@ -209,12 +215,10 @@ router.put('/update', isAuth, receiptUpload.single('receipt'), async (req, res) 
 
 router.delete('/:id', isAuth, async (req, res) => {
     try {
-        // Fetch the transaction BEFORE deleting (for the deletion block snapshot)
         const txToDelete = await Transaction.findOne({ _id: req.params.id, userId: req.user.id });
 
         await Transaction.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
 
-        // Mine a DELETION block — permanent proof this transaction existed and was deleted
         if (txToDelete) {
             try {
                 await addDeletionBlock(txToDelete, txToDelete.blockHash);
@@ -234,9 +238,6 @@ router.get('/import', isAuth, (req, res) => {
     res.render('transactions/import', { title: 'Import Bank Statement' });
 });
 
-// ── DEBUG: Upload a file and see exactly what text is extracted ──────────────
-// Visit /transactions/import/debug-upload , upload the file, and you'll see
-// the raw text that pdf-parse / csv-parser extracts. Remove this in production.
 router.post('/import/debug', isAuth, upload.single('statement'), async (req, res) => {
     try {
         if (!req.file) return res.json({ error: 'No file uploaded' });
@@ -250,7 +251,6 @@ router.post('/import/debug', isAuth, upload.single('statement'), async (req, res
         }
 
         if (nameLower.endsWith('.csv')) {
-            const fs      = require('fs');
             const content = fs.readFileSync(filePath, 'utf-8');
             return res.type('text').send(content);
         }
@@ -261,14 +261,12 @@ router.post('/import/debug', isAuth, upload.single('statement'), async (req, res
     }
 });
 
-
 router.post('/import', isAuth, upload.single('statement'), async (req, res) => {
     try {
         if (!req.file) {
             req.flash('error', 'Please upload a CSV or PDF file.');
             return res.redirect('/transactions/import');
         }
-
 
         const filePath = req.file.path;
         const userCurrency = req.user.currency || 'USD';
@@ -277,10 +275,8 @@ router.post('/import', isAuth, upload.single('statement'), async (req, res) => {
         const originalNameLower = req.file.originalname.toLowerCase();
 
         if (req.file.mimetype === 'text/csv' || originalNameLower.endsWith('.csv')) {
-            // parseCSV now handles ALL column detection, date normalisation, and type inference internally
             pTransactions = await parseCSV(filePath, userCurrency);
             console.log(`[Import] CSV parsed: ${pTransactions.length} transactions extracted`);
-
         } else if (req.file.mimetype === 'application/pdf' || originalNameLower.endsWith('.pdf')) {
             const pdfText = await parsePDF(filePath);
             console.log(`[Import] PDF text length: ${pdfText.length} chars`);
@@ -351,7 +347,6 @@ router.post('/import/confirm', isAuth, async (req, res) => {
                 userId: req.user.id
             });
 
-            // Mine a blockchain block for each imported transaction
             try {
                 const block = await addTransactionBlock(newTx);
                 await Transaction.findByIdAndUpdate(newTx._id, { blockHash: block.hash });
@@ -369,4 +364,4 @@ router.post('/import/confirm', isAuth, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

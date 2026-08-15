@@ -1,5 +1,4 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/finance_tracker';
 
@@ -20,4 +19,5 @@ const connectDB = async (attempt = 1, maxAttempts = 5) => {
     }
 };
 
-module.exports = connectDB;
+export default connectDB;
+

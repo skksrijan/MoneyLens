@@ -1,4 +1,4 @@
-const { Transaction, Category } = require('../models');
+import { Transaction, Category } from '../models/index.js';
 
 const getAnomalies = async (userId) => {
     // 1. Fetch all expense transactions to build a baseline
@@ -63,4 +63,5 @@ const getAnomalies = async (userId) => {
     return anomalies.sort((a, b) => new Date(b.transaction.date) - new Date(a.transaction.date));
 };
 
-module.exports = { getAnomalies };
+export { getAnomalies };
+

@@ -1,5 +1,5 @@
 {
-  "name": "personal-finance-tracker",
+  "name": "moneylens",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,7 +14,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "@emailjs/nodejs": "^5.0.2",
     "axios": "^1.13.5",

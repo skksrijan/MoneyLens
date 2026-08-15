@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const BlockchainBlockSchema = new mongoose.Schema({
     index: {
@@ -53,5 +53,6 @@ const BlockchainBlockSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model('BlockchainBlock', BlockchainBlockSchema);
+export default mongoose.model('BlockchainBlock', BlockchainBlockSchema);
+
 

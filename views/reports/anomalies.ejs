@@ -72,7 +72,7 @@
                     style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
                     <i data-lucide="shield-check" style="color: var(--success); width: 40px; height: 40px;"></i>
                 </div>
-                <h2 style="font-size: 1.5rem; color: white; margin-bottom: 10px;">Everything is healthy</h2>
+                <h2 style="font-size: 1.5rem; color: var(--text-main); margin-bottom: 10px;">Everything is healthy</h2>
                 <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto;">We analyzed your last 6 months of
                     data and found no significant outliers or unusual clusters.</p>
             </div>
@@ -88,7 +88,7 @@
                                         style="text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; font-size: 0.7rem; padding: 4px 10px; border-radius: 6px;">
                                         <%= item.severity %> RISK
                                     </span>
-                                    <div style="margin-top: 12px; font-weight: 600; font-size: 1.1rem; color: white;">
+                                    <div style="margin-top: 12px; font-weight: 600; font-size: 1.1rem; color: var(--text-main);">
                                         <%= item.transaction.description %>
                                     </div>
                                     <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">
@@ -99,7 +99,7 @@
                                     </div>
                                 </div>
                                 <div style="text-align: right;">
-                                    <div style="font-size: 1.3rem; font-weight: 800; color: white;">
+                                    <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-main);">
                                         <%= userCurrency %>
                                             <%= parseFloat(item.transaction.amount).toLocaleString(undefined,
                                                 {minimumFractionDigits: 2}) %>

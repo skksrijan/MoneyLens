@@ -14,7 +14,7 @@
                 <form action="/reports" method="GET" style="display: flex; gap: 10px; align-items: center;">
                     <label style="color: var(--text-muted);">Year:</label>
                     <select name="year" onchange="this.form.submit()"
-                        style="background: var(--bg-card); color: white; border: 1px solid var(--border); padding: 8px; border-radius: 8px; cursor: pointer;">
+                        style="background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 8px; border-radius: 8px; cursor: pointer; font-family: inherit;">
                         <% for(let y=new Date().getFullYear(); y>= 2020; y--) { %>
                             <option value="<%= y %>" <%=currentYear==y ? 'selected' : '' %>><%= y %>
                             </option>

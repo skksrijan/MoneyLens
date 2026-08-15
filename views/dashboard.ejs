@@ -126,8 +126,7 @@
                                             <% } %>
                                     </div>
                                     <span style="font-size: 0.9rem; color: var(--text-muted);">
-                                        <strong <%- parseFloat(b.spent)> parseFloat(b.limit) ? 'style="color: #ef4444;"'
-                                            : 'style="color: #f8fafc;"' %>>
+                                        <strong style="color: <%= parseFloat(b.spent) > parseFloat(b.limit) ? 'var(--danger)' : 'var(--text-main)' %>; font-weight: 700;">
                                             <%= userCurrency %>
                                                 <%= parseFloat(b.spent).toLocaleString(undefined,
                                                     {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
@@ -138,10 +137,10 @@
                                     </span>
                                 </div>
                                 <div
-                                    style="background: var(--bg-main); height: 8px; border-radius: 4px; overflow: hidden;">
+                                    style="background: var(--bg-subtle); height: 8px; border-radius: 4px; overflow: hidden;">
                                     <div class="progress-bar"
                                         style="height: 100%; width: 0%; transition: all 0.6s ease;"
-                                        data-percent="<%= b.percent %>"></div>
+                                        data-percent="<%= Math.min(b.percent, 100) %>"></div>
                                 </div>
                             </div>
                             <% }); %>

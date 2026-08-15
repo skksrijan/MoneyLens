@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { getAIResponse } = require('../services/aiService');
+import { getAIResponse } from '../services/aiService.js';
 
 const isAuth = (req, res, next) => req.isAuthenticated() ? next() : res.redirect('/auth/login');
 
@@ -29,4 +29,4 @@ router.post('/chat', isAuth, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

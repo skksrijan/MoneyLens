@@ -1,8 +1,10 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const passport = require('passport');
-const bcrypt = require('bcryptjs');
-const { User, Category } = require('../models');
+import passport from 'passport';
+import bcrypt from 'bcryptjs';
+import { User, Category } from '../models/index.js';
+import { ensureDefaultCategories } from '../services/categoryService.js';
+import { sendOTP } from '../services/emailService.js';
 
 router.get('/login', (req, res) => res.render('login', { title: 'Login' }));
 router.get('/register', (req, res) => res.render('register', { title: 'Register' }));
@@ -11,14 +13,13 @@ router.get('/register', (req, res) => res.render('register', { title: 'Register'
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/auth/login' }), async (req, res) => {
     if (req.user) {
         await User.findByIdAndUpdate(req.user.id, { isVerified: true });
+        await ensureDefaultCategories(req.user.id);
         res.redirect('/dashboard');
     } else {
         res.redirect('/auth/login');
     }
 });
 
-// Email service imports
-const { sendOTP } = require('../services/emailService');
 
 router.post('/register', async (req, res) => {
     console.log('Register request received for:', req.body.email);
@@ -37,12 +38,7 @@ router.post('/register', async (req, res) => {
         });
 
         // Add default categories immediately
-        const defaultCategories = [
-            { name: 'Food', type: 'expense' }, { name: 'Rent', type: 'expense' },
-            { name: 'Salary', type: 'income' }, { name: 'Investment', type: 'income' },
-            { name: 'Shopping', type: 'expense' }, { name: 'Health', type: 'expense' }
-        ];
-        await Category.insertMany(defaultCategories.map(c => ({ ...c, userId: newUser._id })));
+        await ensureDefaultCategories(newUser._id);
 
         req.flash('success', 'Registration successful! You can now login.');
         res.redirect('/auth/login');
@@ -51,8 +47,6 @@ router.post('/register', async (req, res) => {
         res.render('register', { title: 'Register', error: 'Something went wrong' });
     }
 });
-
-// Email verification routes removed per user request
 
 router.post('/login', passport.authenticate('local', {
     successRedirect: '/dashboard',
@@ -143,4 +137,4 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

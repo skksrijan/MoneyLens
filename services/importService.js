@@ -1,11 +1,11 @@
 'use strict';
 
-const fs   = require('fs');
-const path = require('path');
-const Papa = require('papaparse');
-const pdf  = require('pdf-parse');
-const axios = require('axios');
-const { Transaction, Category } = require('../models');
+import fs from 'fs';
+import path from 'path';
+import Papa from 'papaparse';
+import pdf from 'pdf-parse/lib/pdf-parse.js';
+import axios from 'axios';
+import { Transaction, Category } from '../models/index.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // UTILITIES
@@ -291,14 +291,17 @@ const parsePDF = async (filePath) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const parsePDFWithAI = async (pdfText, userCurrency) => {
-    const apiKey = (process.env.XAI_API_KEY || '').trim();
+    const apiKey = (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.XAI_API_KEY || '').trim();
     if (!apiKey || apiKey === 'your_grok_xai_api_key_here') {
-        throw new Error('AI API key is missing or is a placeholder.');
+        throw new Error('AI API key is missing. Please add GEMINI_API_KEY or XAI_API_KEY in your .env file.');
     }
 
     let apiUrl = 'https://api.x.ai/v1/chat/completions';
     let model  = 'grok-beta';
-    if (apiKey.startsWith('gsk_')) {
+    if (apiKey.startsWith('AIza') || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
+        apiUrl = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+        model  = 'gemini-2.5-flash';
+    } else if (apiKey.startsWith('gsk_')) {
         apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
         model  = 'llama-3.3-70b-versatile';
     }
@@ -588,7 +591,7 @@ const autoCategorize = async (userId, transactions) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-module.exports = {
+export {
     parseCSV,
     parsePDF,
     parsePDFWithAI,

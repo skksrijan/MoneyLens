@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 let cachedRates = {};
 let lastFetch = 0;
@@ -49,4 +49,5 @@ async function convert(amount, from, to) {
     return isNaN(result) ? numericAmount : result;
 }
 
-module.exports = { convert, getRates };
+export { convert, getRates };
+

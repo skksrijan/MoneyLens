@@ -1,8 +1,9 @@
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const bcrypt = require('bcryptjs');
-const { User } = require('../models');
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import bcrypt from 'bcryptjs';
+import { User } from '../models/index.js';
+import { ensureDefaultCategories } from '../services/categoryService.js';
 
 passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
     try {
@@ -50,6 +51,9 @@ passport.use(new GoogleStrategy({
                     isVerified: true
                 });
             }
+        }
+        if (user) {
+            await ensureDefaultCategories(user._id);
         }
         return done(null, user);
     } catch (err) {

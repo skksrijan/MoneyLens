@@ -1,18 +1,23 @@
-require('dotenv').config();
-const express = require('express');
-const path = require('path');
-const session = require('express-session');
-const passport = require('passport');
-require('./config/passport'); // Load passport config
-const methodOverride = require('method-override');
-const flash = require('express-flash');
-const connectDB = require('./config/db');
-require('./models'); // Load all Mongoose models
+import 'dotenv/config';
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import session from 'express-session';
+import passport from 'passport';
+import './config/passport.js'; // Load passport config
+import methodOverride from 'method-override';
+import flash from 'express-flash';
+import connectDB from './config/db.js';
+import './models/index.js'; // Load all Mongoose models
+import fs from 'fs';
+
+// ESM equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
-const fs = require('fs');
 
 // Ensure uploads directory exists
 const uploadDir = path.join(__dirname, 'uploads');
@@ -46,17 +51,16 @@ app.use((req, res, next) => {
 });
 
 // Routes
-const authRouter = require('./routes/auth');
-const dashboardRouter = require('./routes/dashboard');
-const transactionRouter = require('./routes/transactions');
-const budgetRouter = require('./routes/budgets');
-const reportRouter = require('./routes/reports');
-const categoryRouter = require('./routes/categories');
-const savingsRouter = require('./routes/savings');
-const blockchainRouter = require('./routes/blockchain');
-
-const userRouter = require('./routes/user');
-const aiRouter = require('./routes/ai');
+import authRouter from './routes/auth.js';
+import dashboardRouter from './routes/dashboard.js';
+import transactionRouter from './routes/transactions.js';
+import budgetRouter from './routes/budgets.js';
+import reportRouter from './routes/reports.js';
+import categoryRouter from './routes/categories.js';
+import savingsRouter from './routes/savings.js';
+import blockchainRouter from './routes/blockchain.js';
+import userRouter from './routes/user.js';
+import aiRouter from './routes/ai.js';
 
 app.use('/auth', authRouter);
 app.use('/auth/ai', aiRouter);
@@ -74,11 +78,11 @@ app.get('/', (req, res) => {
     if (req.isAuthenticated()) {
         return res.redirect('/dashboard');
     }
-    res.render('index', { title: 'Personal Finance Tracker' });
+    res.render('index', { title: 'MoneyLens' });
 });
 
 // Database Connect & Server Start
-const { initBlockchain } = require('./services/blockchainService');
+import { initBlockchain } from './services/blockchainService.js';
 
 connectDB().then(async () => {
     await initBlockchain();
