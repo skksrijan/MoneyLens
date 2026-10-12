@@ -73,10 +73,21 @@ const clientDist = path.join(__dirname, 'client', 'dist');
 if (fs.existsSync(clientDist)) {
     app.use(express.static(clientDist));
     app.use((req, res, next) => {
-        if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/uploads') && !req.path.startsWith('/auth/google')) {
+        if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/uploads') && !req.path.startsWith('/auth')) {
             return res.sendFile(path.join(clientDist, 'index.html'));
         }
         next();
+    });
+} else {
+    console.warn('⚠️ [MoneyLens] client/dist directory not found. Please run "npm run build".');
+    app.get('/', (req, res) => {
+        res.status(200).send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head><meta charset="UTF-8"><title>MoneyLens API</title><style>body{font-family:system-ui,sans-serif;background:#090d16;color:#f8fafc;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center}h1{color:#10b981;margin-bottom:8px}p{color:#94a3b8;font-size:16px}</style></head>
+            <body><div><h1>MoneyLens Server Operational</h1><p>API is active. Frontend build is initializing...</p></div></body>
+            </html>
+        `);
     });
 }
 

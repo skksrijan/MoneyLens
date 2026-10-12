@@ -3,7 +3,7 @@ services:
     name: finance-tracker
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npm run build
     startCommand: node app.js
     envVars:
       - key: DB_HOST

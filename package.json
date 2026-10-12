@@ -9,6 +9,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
+    "build": "npm --prefix client install --include=dev && npm --prefix client run build",
+    "postinstall": "npm --prefix client install --include=dev && npm --prefix client run build",
     "build:client": "npm --prefix client run build",
     "client": "npm --prefix client run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
