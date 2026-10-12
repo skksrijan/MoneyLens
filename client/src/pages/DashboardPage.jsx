@@ -10,7 +10,8 @@ import {
   ArrowRight,
   PlusCircle,
   Sparkles,
-  Receipt
+  Receipt,
+  PieChart
 } from 'lucide-react';
 import { Chart as ChartJS, registerables } from 'chart.js';
 
@@ -139,7 +140,18 @@ const DashboardPage = () => {
     );
   }
 
-  if (!data) return null;
+  if (!data) {
+    return (
+      <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
+        <p style={{ color: 'var(--danger)', marginBottom: '16px' }}>
+          Unable to load dashboard data. Please check your connection.
+        </p>
+        <button onClick={fetchDashboard} className="btn btn-outline btn-sm">
+          Retry Loading
+        </button>
+      </div>
+    );
+  }
 
   const fmt = (num) =>
     (num || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
