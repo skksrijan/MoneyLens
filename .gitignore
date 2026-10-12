@@ -5,3 +5,11 @@ uploads/
 *.log
 .DS_Store
 MoneyLens_System_Design_and_Resume.pdf
+MoneyLens_Complete_System_Design.pdf
+MoneyLens_System_Design_Notes.md
+MoneyLens_System_Design_Notes.txt
+README.txt
+MoneyLens_Interview_Prep.md
+moneylens_interviewprep.md
+*interviewprep*
+client/dist/

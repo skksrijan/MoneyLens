@@ -9,6 +9,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
+    "build:client": "npm --prefix client run build",
+    "client": "npm --prefix client run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -22,6 +24,7 @@
     "chart.js": "^4.5.1",
     "connect-mongo": "^6.0.0",
     "cookie-session": "^2.1.1",
+    "cors": "^2.8.6",
     "csv-parser": "^3.1.2",
     "dotenv": "^17.2.4",
     "ejs": "^4.0.1",

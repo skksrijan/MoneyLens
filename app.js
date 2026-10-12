@@ -8,6 +8,7 @@ import passport from 'passport';
 import './config/passport.js'; // Load passport config
 import methodOverride from 'method-override';
 import flash from 'express-flash';
+import cors from 'cors';
 import connectDB from './config/db.js';
 import './models/index.js'; // Load all Mongoose models
 import fs from 'fs';
@@ -19,6 +20,24 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
+
+// CORS setup for React client
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps, curl, or same-origin)
+        if (!origin) return callback(null, true);
+        const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'];
+        if (process.env.BASE_URL) allowedOrigins.push(process.env.BASE_URL);
+        if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:')) {
+            callback(null, true);
+        } else {
+            callback(null, true); // Allow during development
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Ensure uploads directory exists
 const uploadDir = path.join(__dirname, 'uploads');
@@ -66,7 +85,12 @@ import savingsRouter from './routes/savings.js';
 import blockchainRouter from './routes/blockchain.js';
 import userRouter from './routes/user.js';
 import aiRouter from './routes/ai.js';
+import apiRouter from './routes/api.js';
 
+// REST API for React SPA
+app.use('/api', apiRouter);
+
+// Traditional SSR routes
 app.use('/auth', authRouter);
 app.use('/auth/ai', aiRouter);
 app.use('/dashboard', dashboardRouter);
@@ -79,12 +103,24 @@ app.use('/user', userRouter);
 app.use('/blockchain', blockchainRouter);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-app.get('/', (req, res) => {
-    if (req.isAuthenticated()) {
-        return res.redirect('/dashboard');
-    }
-    res.render('index', { title: 'MoneyLens' });
-});
+// Serve React production build if available
+const clientDist = path.join(__dirname, 'client', 'dist');
+if (fs.existsSync(clientDist)) {
+    app.use(express.static(clientDist));
+    app.use((req, res, next) => {
+        if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/uploads') && !req.path.startsWith('/auth/google')) {
+            return res.sendFile(path.join(clientDist, 'index.html'));
+        }
+        next();
+    });
+} else {
+    app.get('/', (req, res) => {
+        if (req.isAuthenticated()) {
+            return res.redirect('/dashboard');
+        }
+        res.render('index', { title: 'MoneyLens' });
+    });
+}
 
 // Database Connect & Server Start
 import { initBlockchain } from './services/blockchainService.js';
